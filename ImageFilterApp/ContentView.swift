@@ -6,15 +6,18 @@
 //
 
 import SwiftUI
+import PhotosUI
 
 struct ContentView: View {
-    @State private var image: UIImage? = UIImage(named: "sample")
+    //@State private var image: UIImage? = UIImage(named: "sample")
     @State private var selectedFilter: FilterType = .grayscale
     @State private var intensity: Float = 0.5
     @State private var showOriginal = false
     @State private var splitPosition: Float = 0.5
     @State private var renderer = Renderer()
     @State private var showSaveMessage = false
+    @State private var selectedItem: PhotosPickerItem?
+    @State private var image: UIImage?
     
     var body: some View {
         VStack {
@@ -42,21 +45,39 @@ struct ContentView: View {
             VStack {
                 Spacer()
                 
-                Image(uiImage: image!)
-                    .resizable()
-                    .scaledToFit()
-                    .frame(maxHeight: 250)
+                if let image = image {
+                    Image(uiImage: image)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(maxHeight: 250)
+                }
                 
                 Spacer()
                 
-                Button {
-                } label: {
-                    Label("画像を変更", systemImage: "photo")
+                /*
+                if let image = image {
+                    Image(uiImage: image)
+                } else {
+                    Text("画像を選択してください")
+                }
+                */
+                PhotosPicker(selection: $selectedItem, matching: .images) {
+                    Label("画像を選択してください", systemImage: "photo")
                         .padding()
                         .frame(maxWidth: .infinity)
                         .background(Color.blue)
                         .foregroundColor(.white)
                         .cornerRadius(10)
+                }
+                
+                .onChange(of: selectedItem) { newItem in
+                    Task {
+                        if let data = try? await newItem?.loadTransferable(type: Data.self),
+                           let uiImage = UIImage(data: data) {
+                            
+                            image = uiImage.normalized()
+                        }
+                    }
                 }
                 
                 Toggle("Before / After", isOn: $showOriginal)
@@ -121,6 +142,19 @@ struct ContentView: View {
             }
                 .animation(.easeInOut(duration: 0.3), value: showSaveMessage),
         )
+    }
+}
+
+extension UIImage {
+    func normalized() -> UIImage {
+        if imageOrientation == .up { return self }
+        
+        UIGraphicsBeginImageContextWithOptions(size, false, scale)
+        draw(in: CGRect(origin: .zero, size: size))
+        let normalizedImage = UIGraphicsGetImageFromCurrentImageContext()
+        UIGraphicsEndImageContext()
+        
+        return normalizedImage ?? self
     }
 }
 

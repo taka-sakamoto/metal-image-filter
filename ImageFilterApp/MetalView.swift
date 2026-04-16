@@ -40,6 +40,8 @@ struct MetalView: UIViewRepresentable {
         context.coordinator.adjustedIntensity = intensity
     }
     
+    
+    
 }
 
 /*

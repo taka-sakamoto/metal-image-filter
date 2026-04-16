@@ -19,32 +19,17 @@ class Renderer: NSObject, MTKViewDelegate {
     var snapshotPipeline: MTLRenderPipelineState!
     var adjustedIntensity: Float = 1.0
     
-    
-    /*
-    var adjustedIntensity: Float {
-        switch currentFilter {
-        case .blur:
-            return intensity
-        case .sepia:
-            return intensity * 1.3
-        case .grayscale:
-            return 1.0
-        case .normal:
-            return 0.0
+    var image: UIImage? {
+        didSet {
+            loadTexture()
+            createIntermediateTexture(size: imageSize)
         }
     }
-    */
     
     var texture: MTLTexture?
     weak var mtkView: MTKView?
     
     var imageSize: CGSize = .zero
-    
-    var image: UIImage? {
-        didSet {
-            loadTexture()
-        }
-    }
     
     var blurHorizontalPipeline: MTLRenderPipelineState!
     var blurVerticalPipeline: MTLRenderPipelineState!
@@ -254,9 +239,6 @@ class Renderer: NSObject, MTKViewDelegate {
             length: MemoryLayout<Float>.size * vertices.count,
             index: 0)
         
-        //var intensity: Float = 1.0
-        //var split: Float = 0.5
-        
         encoder.setFragmentBytes(&intensity, length: 4, index: 0)
         encoder.setFragmentBytes(&split, length: 4, index: 1)
         
@@ -281,180 +263,6 @@ class Renderer: NSObject, MTKViewDelegate {
         
         commandBuffer.present(drawable)
         commandBuffer.commit()
-        
-  
-        /*
-        if intermediateTexture == nil ||
-            intermediateTexture!.width != Int(view.drawableSize.width) ||
-            intermediateTexture!.height != Int(view.drawableSize.height) {
-            
-            createIntermediateTexture(size: view.drawableSize)
-        }
-        
-        guard let drawable = view.currentDrawable,
-              let passDescriptor = view.currentRenderPassDescriptor,
-              let texture = texture else { return }
-        
-        let commandBuffer = commandQueue.makeCommandBuffer()!
-        
-        // 頂点計算（共通）
-        let viewSize = view.drawableSize
-        
-        let imageAspect = imageSize.width / imageSize.height
-        let viewAspect = viewSize.width / viewSize.height
-        
-        var scaleX: Float = 1.0
-        var scaleY: Float = 1.0
-        
-        if imageAspect > viewAspect {
-            scaleY = Float(viewAspect / imageAspect)
-        } else {
-            scaleX = Float(imageAspect / viewAspect)
-        }
-        
-        /*
-        let vertices: [Float] = [
-            -scaleX, -scaleY, 0, 1,
-             scaleX, -scaleY, 1, 1,
-             -scaleX,  scaleY, 0, 0,
-             scaleX,  scaleY, 1, 0,
-        ]
-        */
-        
-        let vertices: [Float] = [
-            // position(x,y,z,w) + uv(u,v)
-            -1, -1, 0, 1, 0, 1,
-             1, -1, 0, 1, 1, 1,
-            -1,  1, 0, 1, 0, 0,
-             1,  1, 0, 1, 1, 0
-        ]
-         
-        var intensityValue = adjustedIntensity
-        
-        let filterToUse: FilterType = showOriginal ? .normal : currentFilter
-        
-        var value = adjustedIntensity
-        var split = splitPosition
-        
-        
-        if filterToUse == .blur,
-           let intermediateTexture = intermediateTexture {
-            
-            // 1横ブラー → 中間テクスチャ
-            let pass1 = MTLRenderPassDescriptor()
-            pass1.colorAttachments[0].texture = intermediateTexture
-            pass1.colorAttachments[0].loadAction = .clear
-            pass1.colorAttachments[0].storeAction = .store
-            pass1.colorAttachments[0].clearColor = MTLClearColorMake(0, 0, 0, 1)
-            
-            let encoder1 = commandBuffer.makeRenderCommandEncoder(descriptor: pass1)!
-            encoder1.setRenderPipelineState(blurHorizontalPipeline)
-            encoder1.setFragmentTexture(texture, index: 0)
-            
-            
-            encoder1.setFragmentBytes(&intensityValue,
-                                      length: MemoryLayout<Float>.size,
-                                      index: 0)
-            
-            encoder1.setFragmentBytes(&split,
-                                      length: MemoryLayout<Float>.size,
-                                      index: 1)
-            
-            // 頂点もセット（忘れずに）
-            encoder1.setVertexBytes(vertices,
-                                    length: MemoryLayout<Float>.size * vertices.count,
-                                    index: 0)
-            
-            encoder1.setViewport(MTLViewport(
-                originX: 0,
-                originY: 0,
-                width: Double(view.drawableSize.width),
-                height: Double(view.drawableSize.height),
-                znear: 0,
-                zfar: 1
-            ))
-            
-            encoder1.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
-            encoder1.endEncoding()
-            
-            // 2縦ブラー → 画面
-            let encoder2 = commandBuffer.makeRenderCommandEncoder(descriptor: passDescriptor)!
-            encoder2.setRenderPipelineState(blurVerticalPipeline)
-            encoder2.setFragmentTexture(intermediateTexture, index: 0)
-            
-            
-            encoder2.setFragmentBytes(&intensityValue,
-                                      length: MemoryLayout<Float>.size,
-                                      index: 0)
-            
-            encoder2.setFragmentBytes(&split,
-                                      length: MemoryLayout<Float>.size,
-                                      index: 1)
-            
-            encoder2.setVertexBytes(vertices,
-                                    length: MemoryLayout<Float>.size * vertices.count,
-                                    index: 0)
-            
-            encoder2.setViewport(MTLViewport (
-                originX: 0,
-                originY: 0,
-                width: Double(view.drawableSize.width),
-                height: Double(view.drawableSize.height),
-                znear: 0,
-                zfar: 1
-            ))
-            
-            encoder2.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
-            encoder2.endEncoding()
-            
-        } else {
-            let pass = MTLRenderPassDescriptor()
-            pass.colorAttachments[0].texture = outputTexture
-            pass.colorAttachments[0].loadAction = .clear
-            pass.colorAttachments[0].storeAction = .store
-            
-            let encoder = commandBuffer.makeRenderCommandEncoder(descriptor: pass)!
-            
-            encoder.setViewport(MTLViewport(
-                originX: 0,
-                originY: 0,
-                width: Double(view.drawableSize.width),
-                height: Double(view.drawableSize.height),
-                znear: 0,
-                zfar: 1
-            ))
-            
-            encoder.setRenderPipelineState(pipelineStates[currentFilter]!)
-            encoder.setFragmentTexture(texture, index: 0)
-            
-            var intesityValue = intensity
-            var splitValue = splitPosition
-            
-            encoder.setFragmentBytes(&intensityValue,
-                                     length: 4,
-                                     index: 0)
-            
-            encoder.setFragmentBytes(&splitValue,
-                                     length: 4,
-                                     index: 1)
-            
-            // 頂点
-            encoder.setVertexBytes(vertices,
-                                   length: MemoryLayout<Float>.size * fullVertices.count,
-                                   index: 0)
-            
-            encoder.drawPrimitives(type: .triangleStrip, vertexStart: 0, vertexCount: 4)
-            
-            encoder.endEncoding()
-            
-        }
-        
-        lastTexture = drawable.texture
-        
-        commandBuffer.present(drawable)
-        commandBuffer.commit()
-        commandBuffer.waitUntilCompleted()
-        */
     }
     
     func mtkView(_ view: MTKView, drawableSizeWillChange size: CGSize) {
