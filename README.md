@@ -1,6 +1,6 @@
 # Metal Image Filter App
 
-This app demonstrates real-time image filtering using Metal.
+A real-time image filtering app using Metal.
 
 ## Features
 - Grayscale filter
@@ -8,11 +8,16 @@ This app demonstrates real-time image filtering using Metal.
 - Blur filter
 - Intensity control
 - Before / After comparison slider
-- Image saving
+- Save image to Photos
 
-## Tech
+## Tech Stack
 - SwiftUI
-- Metal (GPU-based rendering)
+- Metal (GPU rendering)
+
+## Highlights
+- Real-time GPU-based image processing
+- Custom fragment shaders
+- Smooth UI interaction with SwiftUI
 
 ## Screenshots
 <img src="Iscreenshot1.png" width="250">
