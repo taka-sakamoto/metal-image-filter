@@ -1,6 +1,6 @@
 # Metal Image Filter App
 
-A real-time image filtering app built with Metal and SwiftUI.
+A real-time GPU-based image filtering app built with Metal and SwiftUI, featuring interactive comparison and adjustable effects.
 
 ## 🚀 Features
 
@@ -28,6 +28,7 @@ A real-time image filtering app built with Metal and SwiftUI.
 
 ## 📱 Screenshots
 
+Grayscale / Sepia / Blur with Before-After comparison
 <p float="left">
   <img src="https://raw.githubusercontent.com/taka-sakamoto/metal-image-filter/main/screenshot1.png" width="250"/>
   <img src="https://raw.githubusercontent.com/taka-sakamoto/metal-image-filter/main/screenshot2.png" width="250"/>
