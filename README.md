@@ -28,10 +28,11 @@ A real-time image filtering app built with Metal and SwiftUI.
 
 ## 📱 Screenshots
 
-<!-- Add screenshots here -->
-<!-- Example:
-![screenshot](./screenshots/sample.png)
--->
+<p float="left">
+  <img src="Iscreenshot1.png" />
+  <img src="Iscreenshot2.png" />
+  <img src="Iscreenshot3.png" />
+</p>
 
 ## 🎯 Purpose
 
