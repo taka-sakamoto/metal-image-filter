@@ -11,6 +11,8 @@ A real-time GPU-based image filtering app built with Metal and SwiftUI, featurin
 - Before / After comparison slider
 - Image saving to Photos
 - Save confirmation toast message
+- Load image from photo library
+- Handle image orientation correctly
 
 ## 🛠 Tech Stack
 
