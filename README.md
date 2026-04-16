@@ -15,3 +15,4 @@ This app demonstrates real-time image filtering using Metal.
 - Metal (GPU-based rendering)
 
 ## Screenshots
+<img src="Iscreenshot1.png" width="250">
