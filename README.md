@@ -29,9 +29,9 @@ A real-time image filtering app built with Metal and SwiftUI.
 ## 📱 Screenshots
 
 <p float="left">
-  <img src="Iscreenshot1.png" />
-  <img src="Iscreenshot2.png" />
-  <img src="Iscreenshot3.png" />
+  <img src="https://raw.githubusercontent.com/taka-sakamoto/metal-image-filter/main/Iscreenshot1.png" width="250"/>
+  <img src="https://raw.githubusercontent.com/taka-sakamoto/metal-image-filter/main/Iscreenshot2.png" width="250"/>
+  <img src="https://raw.githubusercontent.com/taka-sakamoto/metal-image-filter/main/Iscreenshot3.png" width="250"/>
 </p>
 
 ## 🎯 Purpose
